@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Keyboard Closet</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: a dressing room. The doll stands on a themed stage on the left; the wardrobe is five rails of keyed tiles on the right. */
+:root{
+  --bg:#f3eefb; --panel:#ffffff; --ink:#2b1d3f; --muted:#6c5d85; --line:#dcd2ee;
+  --accent:#d6257a; --accent-ink:#ffffff; --key:#ffffff; --key-edge:#b9a9d6; --tile:#faf7ff; --gold:#c98a00;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#1a1326; --panel:#241a35; --ink:#f3ecff; --muted:#b3a5cc; --line:#3b2d55;
+  --accent:#ff6bb0; --accent-ink:#2b0a1c; --key:#34264d; --key-edge:#0f0a18; --tile:#2c2040; --gold:#ffcf4a; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#1a1326; --panel:#241a35; --ink:#f3ecff; --muted:#b3a5cc; --line:#3b2d55;
+  --accent:#ff6bb0; --accent-ink:#2b0a1c; --key:#34264d; --key-edge:#0f0a18; --tile:#2c2040; --gold:#ffcf4a; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:20px 40px;display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4vw,2.4rem);margin:0;letter-spacing:-.01em;text-wrap:balance}
+header p{margin:0;color:var(--muted);font-weight:700}
+.credit{margin-left:auto;font-size:.85rem}
+
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+kbd{font-family:var(--display);font-weight:600;font-size:.8em;background:var(--key);color:var(--ink);border:1px solid var(--key-edge);border-bottom-width:3px;border-radius:6px;padding:0 6px;min-width:1.6em;display:inline-block;text-align:center;line-height:1.5}
+
+.themes{display:flex;gap:8px;overflow-x:auto;padding-block:4px;scrollbar-width:thin}
+.chip{flex:none;display:flex;align-items:center;gap:6px;background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:5px 12px 5px 6px;font-weight:800;white-space:nowrap}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.chip .star{color:var(--gold)}
+.chip[aria-pressed="true"] .star{color:inherit}
+
+.room{display:grid;grid-template-columns:minmax(260px,360px) minmax(0,1fr);gap:20px;align-items:start}
+.left{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:flex;flex-direction:column;gap:10px}
+.stage{position:relative;height:min(68vh,600px);border-radius:24px;overflow:hidden;border:3px solid var(--panel);box-shadow:0 0 0 2px var(--line)}
+.stage svg.doll{width:100%;height:100%;display:block}
+.stage.pose svg.doll .figure{animation:hop .5s ease 2;transform-origin:100px 380px}
+@keyframes hop{50%{transform:translateY(-10px) rotate(-2deg)}}
+.tag{position:absolute;top:10px;left:10px;background:var(--panel);color:var(--ink);font-family:var(--display);font-weight:600;border-radius:999px;padding:2px 12px;font-size:.9rem}
+.banner{position:absolute;left:10px;right:10px;bottom:10px;background:var(--panel);color:var(--ink);border-radius:16px;padding:8px 12px;text-align:center;font-family:var(--display);font-weight:600;font-size:1.05rem;text-wrap:balance}
+.banner small{display:block;font-family:var(--body);font-weight:700;color:var(--muted);font-size:.8rem}
+.banner .star{color:var(--gold)}
+.bit{position:absolute;top:-24px;width:18px;height:18px;animation:fall 1.8s linear forwards;pointer-events:none}
+@keyframes fall{to{transform:translateY(680px) rotate(540deg)}}
+
+.status{margin:0;min-height:1.5em;font-weight:800;text-align:center}
+.actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.act{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:6px 10px;font-weight:800;display:flex;gap:6px;align-items:center}
+.act.main{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.skins{display:flex;gap:8px;justify-content:center;align-items:center;color:var(--muted);font-weight:700;font-size:.85rem}
+.skin{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);padding:0}
+.skin[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+
+.wardrobe{display:flex;flex-direction:column;gap:14px;min-width:0}
+.rail h2{font-family:var(--display);font-weight:600;font-size:1.05rem;margin:0 0 6px;display:flex;gap:8px;align-items:baseline}
+.rail h2 span{font-family:var(--body);font-size:.85rem;font-weight:700;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.tile{position:relative;aspect-ratio:1/1.05;background:var(--tile);border:2px solid var(--line);border-radius:14px;padding:4px 4px 14px;overflow:visible}
+.tile svg{width:100%;height:100%;display:block}
+.tile .cap{position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);font-family:var(--display);font-weight:700;font-size:clamp(1rem,2.2vw,1.35rem);line-height:1.35;min-width:1.7em;text-align:center;background:var(--key);color:var(--ink);border:2px solid var(--key-edge);border-bottom-width:4px;border-radius:8px;padding:0 6px}
+.tile[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.tile[aria-pressed="true"] .cap{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.rail{padding-bottom:8px}
+.help{color:var(--muted);font-weight:700;font-size:.9rem;display:flex;flex-wrap:wrap;gap:6px 16px;margin:0;padding:0;list-style:none}
+
+@media (max-width:760px){
+  .room{grid-template-columns:minmax(0,1fr)}
+  .left{position:static}
+  .stagebox{position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+  .stage{height:max(250px,42vh)}
+  .credit{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){ .stage.pose svg.doll .figure{animation:none} .bit{display:none} }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Keyboard Closet</h1>
+    <p>Every piece has a letter on it. Press that letter to wear it.</p>
+    <p class="credit">Game idea by Shivalika</p>
+  </header>
+
+  <div class="themes" id="themes" role="group" aria-label="Themes"></div>
+
+  <div class="room">
+    <div class="left">
+      <div class="stagebox"><div class="stage" id="stage"></div></div>
+      <p class="status" id="status" aria-live="polite"></p>
+      <div class="actions">
+        <button class="act main" id="btn-pose"><kbd>Enter</kbd> Strike a pose</button>
+        <button class="act" id="btn-surprise"><kbd>Space</kbd> Surprise me</button>
+        <button class="act" id="btn-clear"><kbd>⌫</kbd> Start over</button>
+      </div>
+      <div class="skins" id="skins" role="group" aria-label="Skin tone"></div>
+    </div>
+    <div class="wardrobe">
+      <div id="rails"></div>
+      <ul class="help">
+        <li><kbd>1</kbd>–<kbd>0</kbd> or <kbd>←</kbd> <kbd>→</kbd> change theme</li>
+        <li><kbd>↑</kbd> <kbd>↓</kbd> skin tone</li>
+        <li>Press a letter again to take that piece off</li>
+        <li>Wear five pieces from one theme and pose to win its star</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+const THEMES=[
+ {name:'Under the Sea',scene:['#0b6fa4','#7fd6d8'],motif:'drop',colors:['#1fb5a8','#ff7b6b','#f3ead9','#2b59c3','#9be8c8'],names:['Teal','Coral','Pearl','Deep Blue','Seafoam']},
+ {name:'Beach Day',scene:['#58c7e8','#ffd98a'],motif:'sun',colors:['#ffc93c','#ff5d8f','#22c1c3','#fff7e6','#ff8a3d'],names:['Sunny','Hot Pink','Turquoise','Sand White','Orange']},
+ {name:'Galaxy',scene:['#1b1147','#5b2a86'],motif:'star',colors:['#8b5cf6','#d7dbe8','#27306b','#ff4fd8','#5ad1ff'],names:['Violet','Silver','Midnight','Neon Pink','Comet Blue']},
+ {name:'Flower Garden',scene:['#bfe8a8','#fdf3c4'],motif:'flower',colors:['#f26a8d','#4caf6d','#b79ae8','#ffe07a','#ffb38a'],names:['Rose','Leaf Green','Lavender','Buttercup','Peach']},
+ {name:'Candy Shop',scene:['#ffc4e1','#fff0b8'],motif:'dot',colors:['#ff7eb6','#8fe3c2','#ffe45c','#a678e8','#e63950'],names:['Bubblegum','Mint','Lemon','Grape','Cherry']},
+ {name:'Snow Day',scene:['#9fc6ee','#f4faff'],motif:'snow',colors:['#9fd4ff','#f6fbff','#c2325a','#2f7d5b','#c4ccd8'],names:['Ice Blue','Snow White','Berry','Pine','Silver']},
+ {name:'Royal Ball',scene:['#4a1535','#c98a2b'],motif:'diamond',colors:['#e8b93a','#b3123c','#3743b5','#fbf1dc','#17805c'],names:['Gold','Ruby','Royal Blue','Ivory','Emerald']},
+ {name:'Spooky Night',scene:['#24163a','#e0701b'],motif:'moon',colors:['#f47b20','#2a2433','#9bdb3a','#7b3fb0','#efe8d8'],names:['Pumpkin','Midnight Black','Slime Green','Purple','Bone White']},
+ {name:'Jungle',scene:['#1e6b3c','#b8e06a'],motif:'leaf',colors:['#3fa35a','#f08a24','#e23b3b','#ffd84a','#7a4e2a'],names:['Fern','Tiger','Parrot Red','Banana','Bark Brown']},
+ {name:'Rainbow Party',scene:['#ff9ec7','#8fd0ff'],motif:'heart',colors:['#ff4d4d','#ffd23f','#3ddc84','#3d9bff','#a85cff'],names:['Red','Yellow','Green','Blue','Purple']}
+];
+const CATS=[
+ {id:'hair',label:'Hair',styles:['Long Waves','Space Buns','Bob','Side Ponytail','Curls'],vb:'40 6 120 120'},
+ {id:'makeup',label:'Makeup',styles:['Rosy Glow','Shimmer Lids','Cheek Charms','Wing Liner','Glitter Freckles'],vb:'62 38 76 70'},
+ {id:'dress',label:'Dresses',styles:['Twirl Dress','Ballgown','Tutu','Mermaid Gown','Top and Shorts'],vb:'25 104 150 250'},
+ {id:'acc',label:'Accessories',styles:['Crown','Necklace','Sunglasses','Wings','Wand'],vbs:['60 2 80 74','65 86 70 60','60 38 80 66','5 96 190 130','112 134 78 96']},
+ {id:'shoes',label:'Shoes',styles:['Flats','Boots','Sandals','Sneakers','Socks and Shoes'],vb:'62 296 76 74'}
+];
+const SKINS=['#f6d3b8','#e8b48c','#c98c5e','#9a6238','#6a4026'];
+const ADJ=['Dazzling','Dreamy','Fearless','Twinkly','Legendary','Super Sparkly','Fabulous'];
+const OL='stroke="rgba(40,20,60,.3)" stroke-width="1"';
+
+function rng(seed){let s=seed*9301+49297;return()=>{s=(s*1103515245+12345)%2147483648;return s/2147483648}}
+
+// Build every item once: 10 themes x 5 categories x 5 styles, each with its own letter inside its theme.
+const ITEMS=THEMES.map((t,ti)=>{
+  const r=rng(ti+7),L='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  for(let i=L.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[L[i],L[j]]=[L[j],L[i]]}
+  const out=[];
+  CATS.forEach((c,ci)=>{for(let i=0;i<5;i++){const a=(i+ci*2)%5;
+    out.push({id:ti+'-'+ci+'-'+i,ti,ci,cat:c.id,style:i,A:t.colors[a],B:t.colors[(a+2)%5],C:t.colors[(a+3)%5],
+      motif:t.motif,name:t.names[a]+' '+c.styles[i],letter:L[out.length]})}});
+  return out;
+});
+const BYID={};ITEMS.forEach(l=>l.forEach(it=>BYID[it.id]=it));
+
+function motif(t,x,y,s,f,extra){
+  const g=i=>`<g transform="translate(${x} ${y}) scale(${s/10})" ${extra||''}>${i}</g>`;
+  switch(t){
+    case 'star':{let p='';for(let k=0;k<10;k++){const r=k%2?4.4:10,a=(-90+36*k)*Math.PI/180;p+=(r*Math.cos(a)).toFixed(1)+','+(r*Math.sin(a)).toFixed(1)+' '}return g(`<polygon points="${p}" fill="${f}"/>`)}
+    case 'heart':return g(`<path d="M0 9C-13-1-7-11 0-4C7-11 13-1 0 9Z" fill="${f}"/>`);
+    case 'flower':{let p='';for(let k=0;k<5;k++){const a=(-90+72*k)*Math.PI/180;p+=`<circle cx="${(6*Math.cos(a)).toFixed(1)}" cy="${(6*Math.sin(a)).toFixed(1)}" r="4.6" fill="${f}"/>`}return g(p+'<circle r="3" fill="#fff" fill-opacity=".8"/>')}
+    case 'drop':return g(`<path d="M0-10C7 0 7 8 0 9C-7 8-7 0 0-10Z" fill="${f}"/>`);
+    case 'snow':return g([0,60,120].map(a=>`<path d="M-10 0H10" transform="rotate(${a})" stroke="${f}" stroke-width="2.6" stroke-linecap="round" fill="none"/>`).join(''));
+    case 'moon':return g(`<path d="M4-9A10 10 0 1 0 4 9A7.5 7.5 0 1 1 4-9Z" fill="${f}"/>`);
+    case 'leaf':return g(`<path d="M0-10Q9 0 0 10Q-9 0 0-10Z" transform="rotate(30)" fill="${f}"/>`);
+    case 'sun':return g('<circle r="5" fill="'+f+'"/>'+[0,45,90,135].map(a=>`<path d="M-10 0H10" transform="rotate(${a})" stroke="${f}" stroke-width="2" stroke-linecap="round" fill="none"/>`).join(''));
+    case 'diamond':return g(`<polygon points="0,-10 7,0 0,10 -7,0" fill="${f}"/>`);
+    default:return g(`<circle r="6" fill="${f}"/>`);
+  }
+}
+
+function body(skin){
+  return `<path d="M88 198V352M112 198V352" stroke="${skin}" stroke-width="15" stroke-linecap="round" fill="none"/>
+<path d="M72 124Q58 165 56 212M128 124Q142 165 144 212" stroke="${skin}" stroke-width="12" stroke-linecap="round" fill="none"/>
+<rect x="93" y="96" width="14" height="24" fill="${skin}"/>
+<path d="M72 116Q100 108 128 116L120 185Q126 200 126 214H74Q74 200 80 185Z" fill="#fdfbff" ${OL}/>
+<circle cx="68" cy="72" r="5" fill="${skin}"/><circle cx="132" cy="72" r="5" fill="${skin}"/>
+<ellipse cx="100" cy="68" rx="32" ry="35" fill="${skin}"/>
+<circle cx="87" cy="72" r="4.6" fill="#2b1d2e"/><circle cx="113" cy="72" r="4.6" fill="#2b1d2e"/>
+<circle cx="85.5" cy="70.5" r="1.5" fill="#fff"/><circle cx="111.5" cy="70.5" r="1.5" fill="#fff"/>
+<path d="M92 87Q100 93 108 87" stroke="#a2445f" stroke-width="2" stroke-linecap="round" fill="none"/>`;
+}
+
+const lips=c=>`<path d="M91 86Q96 83 100 85Q104 83 109 86Q100 97 91 86Z" fill="${c}"/>`;
+const lids=(c,w)=>`<path d="M80 66Q87 59 94 66M106 66Q113 59 120 66" stroke="${c}" stroke-width="${w}" stroke-linecap="round" fill="none"/>`;
+
+const DRAW={
+ hair(it){const A=it.A,B=it.B,streak=`<path d="M78 40Q100 31 122 40" stroke="${B}" stroke-width="3" stroke-linecap="round" fill="none" opacity=".8"/>`;
+  let back='',front='';
+  switch(it.style){
+   case 0:back=`<path d="M66 66Q64 20 100 22Q136 20 134 66L140 190Q100 200 60 190Z" fill="${A}" ${OL}/>`;
+     front=`<path d="M68 62Q70 30 100 30Q130 30 132 62Q118 44 100 46Q82 44 68 62Z" fill="${A}"/>`+streak;break;
+   case 1:back=`<ellipse cx="100" cy="58" rx="35" ry="36" fill="${A}"/><circle cx="66" cy="30" r="15" fill="${A}" ${OL}/><circle cx="134" cy="30" r="15" fill="${A}" ${OL}/>`;
+     front=`<path d="M67 64Q66 28 100 28Q134 28 133 64Q120 40 100 48Q80 40 67 64Z" fill="${A}"/><circle cx="74" cy="40" r="4" fill="${B}"/><circle cx="126" cy="40" r="4" fill="${B}"/>`;break;
+   case 2:back=`<path d="M64 70Q60 22 100 22Q140 22 136 70L138 108Q100 118 62 108Z" fill="${A}" ${OL}/>`;
+     front=`<path d="M68 60Q72 30 100 30Q128 30 132 60Q100 50 68 60Z" fill="${A}"/>`+streak;break;
+   case 3:back=`<ellipse cx="100" cy="60" rx="36" ry="38" fill="${A}"/><path d="M130 40Q172 44 166 110Q162 150 148 168Q154 120 140 80Z" fill="${A}" ${OL}/>`;
+     front=`<path d="M67 66Q62 26 100 26Q138 26 133 66Q126 40 96 42Q78 46 67 66Z" fill="${A}"/><circle cx="134" cy="44" r="5" fill="${B}"/>`;break;
+   default:for(let a=150;a<=390;a+=24){const r=a*Math.PI/180;back+=`<circle cx="${(100+36*Math.cos(r)).toFixed(1)}" cy="${(62+36*Math.sin(r)).toFixed(1)}" r="15" fill="${A}"/>`}
+     back+=`<circle cx="62" cy="100" r="14" fill="${A}"/><circle cx="138" cy="100" r="14" fill="${A}"/><ellipse cx="100" cy="58" rx="34" ry="34" fill="${A}"/>`;
+     for(let x=74;x<=126;x+=13)front+=`<circle cx="${x}" cy="${42-Math.round(8*Math.cos((x-100)/30))}" r="9" fill="${A}"/>`;
+     front+=`<circle cx="126" cy="36" r="4" fill="${B}"/>`;
+  }
+  return {back,front}},
+ makeup(it){const A=it.A,B=it.B;let f='';
+  switch(it.style){
+   case 0:f=lips(A)+`<circle cx="79" cy="83" r="6" fill="${A}" opacity=".45"/><circle cx="121" cy="83" r="6" fill="${A}" opacity=".45"/>`;break;
+   case 1:f=lids(B,4.5)+lips(A);break;
+   case 2:f=motif(it.motif,79,84,4.5,A)+motif(it.motif,121,84,4.5,A)+lips(B);break;
+   case 3:f=lids(B,2.5)+`<path d="M82 72L74 66M118 72L126 66" stroke="#2b1d2e" stroke-width="2.4" stroke-linecap="round" fill="none"/>`+lips(A);break;
+   default:f=[[84,81],[89,84],[94,81],[106,81],[111,84],[116,81]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="1.7" fill="${A}"/>`).join('')+motif('star',123,62,4,B)+lips(B);
+  }
+  return {back:'',front:f}},
+ dress(it){const A=it.A,B=it.B,C=it.C,m=(pts,s)=>pts.map(p=>motif(it.motif,p[0],p[1],s,C)).join('');
+  const bod=`<path d="M74 118Q100 128 126 118L120 182H80Z" fill="${A}" ${OL}/>`,band=`<rect x="79" y="174" width="42" height="9" rx="4" fill="${B}"/>`;
+  const puff=`<circle cx="72" cy="123" r="9" fill="${A}" ${OL}/><circle cx="128" cy="123" r="9" fill="${A}" ${OL}/>`;
+  let f='';
+  switch(it.style){
+   case 0:f=`<path d="M80 178H120L150 270Q100 284 50 270Z" fill="${A}" ${OL}/>`+bod+puff+band+m([[80,238],[105,216],[124,246],[98,262]],6);break;
+   case 1:f=`<path d="M80 178H120Q170 250 166 334Q100 348 34 334Q30 250 80 178Z" fill="${A}" ${OL}/><path d="M34 334Q100 348 166 334" stroke="${B}" stroke-width="6" fill="none"/>`+bod+puff+band+m([[72,262],[100,226],[130,266],[86,306],[122,310],[54,312],[148,310]],7);break;
+   case 2:f=bod+`<ellipse cx="100" cy="204" rx="64" ry="24" fill="${B}" ${OL}/><ellipse cx="100" cy="196" rx="55" ry="19" fill="${A}" ${OL}/>`+band+m([[68,198],[100,204],[132,198]],5);break;
+   case 3:f=`<path d="M76 118Q100 126 124 118L120 180Q128 240 118 300Q150 326 150 342Q100 328 50 342Q50 326 82 300Q72 240 80 180Z" fill="${A}" ${OL}/><path d="M82 300Q100 308 118 300" stroke="${B}" stroke-width="5" fill="none"/>`+band+m([[100,214],[93,252],[107,282]],6);break;
+   default:f=`<path d="M78 175H122L127 236H103L100 206L97 236H73Z" fill="${B}" ${OL}/><path d="M74 118Q100 128 126 118L122 178H78Z" fill="${A}" ${OL}/>`+m([[100,150]],9);
+  }
+  return {back:'',front:f}},
+ acc(it){const A=it.A,B=it.B;
+  switch(it.style){
+   case 0:return {back:'',front:`<path d="M78 36L82 14L92 28L100 10L108 28L118 14L122 36Z" fill="${A}" ${OL}/><circle cx="82" cy="14" r="3" fill="${B}"/><circle cx="100" cy="10" r="3.5" fill="${B}"/><circle cx="118" cy="14" r="3" fill="${B}"/><circle cx="100" cy="29" r="3" fill="${B}"/>`};
+   case 1:return {back:'',front:`<path d="M87 106Q100 126 113 106" stroke="${A}" stroke-width="3" stroke-linecap="round" fill="none"/>`+motif(it.motif,100,121,6,B,OL)};
+   case 2:return {back:'',front:`<path d="M97 71H103" stroke="${B}" stroke-width="2.5"/><rect x="76" y="63" width="21" height="16" rx="7" fill="${A}" fill-opacity=".85" stroke="${B}" stroke-width="2.5"/><rect x="103" y="63" width="21" height="16" rx="7" fill="${A}" fill-opacity=".85" stroke="${B}" stroke-width="2.5"/>`};
+   case 3:return {front:'',back:`<ellipse cx="46" cy="150" rx="36" ry="21" transform="rotate(-30 46 150)" fill="${A}" fill-opacity=".9" ${OL}/><ellipse cx="154" cy="150" rx="36" ry="21" transform="rotate(30 154 150)" fill="${A}" fill-opacity=".9" ${OL}/><ellipse cx="54" cy="190" rx="25" ry="14" transform="rotate(25 54 190)" fill="${B}" fill-opacity=".9" ${OL}/><ellipse cx="146" cy="190" rx="25" ry="14" transform="rotate(-25 146 190)" fill="${B}" fill-opacity=".9" ${OL}/>`};
+   default:return {back:'',front:`<path d="M145 216L166 162" stroke="${B}" stroke-width="4" stroke-linecap="round"/>`+motif('star',168,154,12,A,OL)+motif(it.motif,168,155,4,B)};
+  }},
+ shoes(it){const A=it.A,B=it.B;let f='';
+  [[88,-1],[112,1]].forEach(([x,d])=>{const fx=x+d*3;
+   switch(it.style){
+    case 0:f+=`<ellipse cx="${fx}" cy="357" rx="12" ry="6.5" fill="${A}" ${OL}/><circle cx="${fx+d*3}" cy="354" r="2.6" fill="${B}"/>`;break;
+    case 1:f+=`<rect x="${x-9}" y="318" width="18" height="40" rx="6" fill="${A}" ${OL}/><ellipse cx="${fx}" cy="357" rx="13" ry="7" fill="${A}" ${OL}/><rect x="${x-10}" y="314" width="20" height="8" rx="4" fill="${B}"/>`;break;
+    case 2:f+=`<ellipse cx="${fx}" cy="360" rx="12" ry="4" fill="${A}" ${OL}/><path d="M${x-7} 348H${x+7}M${x-7} 339H${x+7}" stroke="${B}" stroke-width="3.2" stroke-linecap="round"/>`;break;
+    case 3:f+=`<ellipse cx="${fx}" cy="356" rx="13" ry="7.5" fill="${A}" ${OL}/><ellipse cx="${fx}" cy="361" rx="13" ry="3.2" fill="#fff" ${OL}/><circle cx="${fx}" cy="354" r="2.6" fill="${B}"/>`;break;
+    default:f+=`<rect x="${x-7.5}" y="306" width="15" height="48" rx="5" fill="${B}" ${OL}/><path d="M${x-7} 316H${x+7}M${x-7} 326H${x+7}" stroke="${A}" stroke-width="3"/><ellipse cx="${fx}" cy="357" rx="12" ry="6.5" fill="${A}" ${OL}/>`;
+   }});
+  return {back:'',front:f}}
+};
+
+function figure(eq,skin){
+  const p={};CATS.forEach(c=>{p[c.id]=eq[c.id]?DRAW[c.id](eq[c.id]):{back:'',front:''}});
+  return p.acc.back+p.hair.back+body(skin)+p.shoes.front+p.dress.front+p.makeup.front+p.hair.front+p.acc.front;
+}
+
+let state={ti:0,eq:{},skin:1,posed:null};
+let stars={};
+try{stars=JSON.parse(localStorage.getItem('kc-stars')||'{}')||{}}catch(e){}
+const $=id=>document.getElementById(id);
+let statusMsg='Pick a theme, then press the letter on anything you like.';
+
+function equipped(){const o={};CATS.forEach(c=>{const id=state.eq[c.id];if(id&&BYID[id])o[c.id]=BYID[id]});return o}
+
+function render(){
+  const t=THEMES[state.ti],eq=equipped(),skin=SKINS[state.skin];
+  $('themes').innerHTML=THEMES.map((th,i)=>`<button class="chip" data-t="${i}" aria-pressed="${i===state.ti}"><kbd>${(i+1)%10}</kbd>${th.name}${stars[i]?' <span class="star" aria-label="star earned">★</span>':''}</button>`).join('');
+  const r=rng(state.ti+31);let decor='';
+  for(let i=0;i<14;i++)decor+=motif(t.motif,10+r()*180,20+r()*330,5+r()*8,'#fff','opacity=".35"');
+  $('stage').style.background=`linear-gradient(${t.scene[0]},${t.scene[1]})`;
+  $('stage').innerHTML=`<svg class="doll" viewBox="0 0 200 400" role="img" aria-label="Your model"><g>${decor}</g><ellipse cx="100" cy="366" rx="62" ry="9" fill="#000" opacity=".18"/><g class="figure">${figure(eq,skin)}</g></svg><div class="tag">${t.name}</div>`+
+    (state.posed?`<div class="banner">${state.posed.title}<small>${state.posed.sub}</small></div>`:'');
+  $('stage').classList.toggle('pose',!!state.posed);
+  $('rails').innerHTML=CATS.map((c,ci)=>{
+    const worn=eq[c.id];
+    return `<section class="rail"><h2>${c.label}<span>${worn?'Wearing: '+worn.name:''}</span></h2><div class="tiles">`+
+      ITEMS[state.ti].filter(it=>it.ci===ci).map(it=>{const one={};one[c.id]=it;
+        return `<button class="tile" data-id="${it.id}" aria-pressed="${state.eq[c.id]===it.id}" aria-label="${it.name}, press ${it.letter}" title="${it.name}"><svg viewBox="${c.vbs?c.vbs[it.style]:c.vb}" aria-hidden="true">${figure(one,skin)}</svg><span class="cap">${it.letter}</span></button>`}).join('')+
+      `</div></section>`}).join('');
+  $('skins').innerHTML='Skin tone'+SKINS.map((s,i)=>`<button class="skin" data-s="${i}" aria-pressed="${i===state.skin}" aria-label="Skin tone ${i+1}" style="background:${s}"></button>`).join('');
+  $('status').textContent=statusMsg;
+}
+
+function wear(it){
+  state.posed=null;
+  if(state.eq[it.cat]===it.id){delete state.eq[it.cat];statusMsg='Took off the '+it.name+'.'}
+  else{state.eq[it.cat]=it.id;statusMsg=it.letter+' — '+it.name+'!'}
+  render();
+}
+function setTheme(i){state.ti=(i+THEMES.length)%THEMES.length;state.posed=null;statusMsg=THEMES[state.ti].name+': new letters, new closet.';render()}
+function setSkin(i){state.skin=(i+SKINS.length)%SKINS.length;render()}
+function surprise(){state.posed=null;CATS.forEach((c,ci)=>{state.eq[c.id]=ITEMS[state.ti][ci*5+Math.floor(Math.random()*5)].id});statusMsg='Surprise! A full '+THEMES[state.ti].name+' look.';render()}
+function clearAll(){state.eq={};state.posed=null;statusMsg='Fresh start. Press any letter.';render()}
+function pose(){
+  const eq=equipped(),missing=CATS.filter(c=>!eq[c.id]).map(c=>c.label.toLowerCase());
+  if(missing.length){state.posed=null;statusMsg='Not ready yet. Still missing: '+missing.join(', ')+'.';render();return}
+  const t=THEMES[state.ti],match=CATS.every(c=>eq[c.id].ti===state.ti);
+  const adj=ADJ[CATS.reduce((n,c)=>n+eq[c.id].style+eq[c.id].ti,0)%ADJ.length];
+  if(match){stars[state.ti]=1;try{localStorage.setItem('kc-stars',JSON.stringify(stars))}catch(e){}
+    const n=Object.keys(stars).length;
+    state.posed={title:`<span class="star">★</span> The ${adj} ${t.name} Look`,sub:n>=THEMES.length?'Every theme star collected!':`Star earned. ${n} of ${THEMES.length} themes done.`};
+    statusMsg='Perfect match!'}
+  else{state.posed={title:`The ${adj} Mix-Up Look`,sub:`For the ${t.name} star, wear five ${t.name} pieces.`};statusMsg='Great mix!'}
+  render();confetti(t,match?26:10);
+}
+function confetti(t,n){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const st=$('stage');
+  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='bit';d.style.left=(Math.random()*94)+'%';d.style.animationDelay=(Math.random()*.6)+'s';
+    d.innerHTML=`<svg viewBox="-12 -12 24 24" width="18" height="18">${motif(t.motif,0,0,10,t.colors[i%5])}</svg>`;st.appendChild(d);setTimeout(()=>d.remove(),2600)}
+}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.id)wear(BYID[b.dataset.id]);
+  else if(b.dataset.t)setTheme(+b.dataset.t);
+  else if(b.dataset.s)setSkin(+b.dataset.s);
+  else if(b.id==='btn-pose')pose();
+  else if(b.id==='btn-surprise')surprise();
+  else if(b.id==='btn-clear')clearAll();
+  if(e.detail>0&&document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+});
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key,onBtn=e.target.closest&&e.target.closest('button');
+  if(/^[a-z]$/i.test(k)){const it=ITEMS[state.ti].find(x=>x.letter===k.toUpperCase());
+    if(it)wear(it);else{statusMsg=k.toUpperCase()+' is not in this closet. Try another letter.';$('status').textContent=statusMsg}return}
+  if(/^[0-9]$/.test(k)){setTheme((+k+9)%10);return}
+  if(k==='ArrowRight'){e.preventDefault();setTheme(state.ti+1)}
+  else if(k==='ArrowLeft'){e.preventDefault();setTheme(state.ti-1)}
+  else if(k==='ArrowUp'){e.preventDefault();setSkin(state.skin-1)}
+  else if(k==='ArrowDown'){e.preventDefault();setSkin(state.skin+1)}
+  else if(k==='Backspace'){e.preventDefault();clearAll()}
+  else if((k===' '||k==='Enter')&&!onBtn){e.preventDefault();k===' '?surprise():pose()}
+});
+
+function start(d){if(d&&typeof d.ti==='number'){state.ti=d.ti;state.eq=d.eq||{};state.skin=d.skin||0}render()}
+window.claude?.hot?.snapshot?.(()=>({ti:state.ti,eq:state.eq,skin:state.skin}));
+window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
+})();
+</script>
+
+</html>
